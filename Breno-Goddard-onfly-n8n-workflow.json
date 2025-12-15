@@ -1,0 +1,275 @@
+{
+  "name": "Processamento CSV Financeiro – Onfly – Breno Goddard",
+  "nodes": [
+    {
+      "parameters": {
+        "downloadAttachments": true,
+        "dataPropertyAttachmentsPrefixName": "attachments",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        160
+      ],
+      "id": "f77f38c3-ba32-43c5-952a-a65ebce07238",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "FBqsxvWYyPSCGgfw",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6a0ec7c2-2122-4051-8777-8c1b050e796a",
+              "leftValue": "={{ Object.keys($binary || {}).length }}\n",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        160
+      ],
+      "id": "a91bd912-3f34-4f0e-891a-90e7a635e2e4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "fromEmail": "goddardbreno@gmail.com",
+        "toEmail": "={{ $node[\"Email Trigger (IMAP)\"].json.from }}\n\n  ",
+        "subject": "Processamento de e-mail – Anexo CSV não encontrado",
+        "html": "=<p>Olá,</p>\n\n<p>Recebemos seu e-mail, porém não foi identificado nenhum anexo CSV para processamento.</p>\n\n<p>Por favor, envie novamente o e-mail com o arquivo CSV anexado.</p>\n\n<p>Atenciosamente,<br>\nOperador Financeiro</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        352
+      ],
+      "id": "74f5487a-9cc6-4653-bca7-77e1797f3916",
+      "name": "Send email",
+      "webhookId": "c08aedd5-4adb-4033-8058-51952f1f2273",
+      "credentials": {
+        "smtp": {
+          "id": "y7h0ETyYhjDUYdvl",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "attachments0",
+        "name": "={{$binary.attachments0.fileName}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1iQgrX6sDU1uBvoVxaaIumeLNxxVuAuUG",
+          "mode": "list",
+          "cachedResultName": "onfly_csv",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1iQgrX6sDU1uBvoVxaaIumeLNxxVuAuUG"
+        },
+        "options": {
+          "simplifyOutput": true
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        448,
+        64
+      ],
+      "id": "c62424a6-9608-416a-bc16-aa49b4aaa026",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "LtS01CN0TzLwiaJa",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "goddardbreno@gmail.com",
+        "toEmail": "={{ $node[\"Email Trigger (IMAP)\"].json.from }}\n",
+        "subject": "Arquivo processado com sucesso",
+        "html": "=<p>Olá,</p>\n\n<p>\nO arquivo <strong>{{ $binary.attachments0.fileName }}</strong>\nfoi processado e salvo com sucesso no Google Drive.\n</p>\n\n<p><strong>Cotação do dólar do dia:</strong></p>\n\n<ul>\n  <li>USD → BRL: {{ $node[\"HTTP Request\"].json.rates.BRL }}</li>\n</ul>\n\n<p>Processo concluído com sucesso.</p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        48
+      ],
+      "id": "72e74310-4ba3-45cf-bcdc-711459b1a01b",
+      "name": "Send email1",
+      "webhookId": "e57ea344-c4df-4557-ba0d-8071addd7a1d",
+      "credentials": {
+        "smtp": {
+          "id": "y7h0ETyYhjDUYdvl",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "400fe577-788c-412a-9ac0-df52f001a4a5",
+              "leftValue": "={{ Object.keys($binary || {}).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        352
+      ],
+      "id": "a91edbd2-51fc-4086-9988-a187741dee22",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.exchangerate-api.com/v4/latest/USD",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        640,
+        -48
+      ],
+      "id": "52fc93d4-1305-4482-99ff-e63b898ac791",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "33214b29-be6f-411a-bb1a-b7cfaa74228a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "13d0e254e8265f5677b99c2f85049900cac3590759fda70b14992b224014ba0c"
+  },
+  "id": "4Ifoobq2foHhA4sb",
+  "tags": []
+}
